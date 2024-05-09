@@ -1,0 +1,19 @@
+#
+# Build configuration for Circle CI
+#
+machine:
+  java:
+    version:oraclejdk8
+
+dependencies:
+  pre:
+    # Update Android dependent SDK and tools
+    # That settings need to be synced with Android Studio build settings
+    - echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository,extra-android-support,android-25
+    - echo y | android update sdk --no-ui --all --filter build-tools-25.0.2
+
+test:
+  override:
+    - ./gradlew assembleDebug
+    - cp -r app/build/output $CIRCLE_ARTIFACTS
+
