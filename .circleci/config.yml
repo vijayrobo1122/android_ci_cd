@@ -1,42 +1,36 @@
 version: 2.1
 
-orbs:
-  android: circleci/android@2.5.0
-  #ruby: circleci/ruby@2.1.2
-  #app-distribution: tadashi0713/app-distribution@1.2.0
+jobs: # a basic unit of work in a run
+  test: # your job name
+    macos:
+      xcode: 14.2.0 # indicate your selected version of Xcode
+    steps: # a series of commands to run
+      - checkout  # pull down code from your version control system.
+      - run:
+          name: Run Unit Tests
+          command: xcodebuild test -scheme circleci-demo-macos
 
-jobs:
-  lint:
-    executor:
-      name: android/android-docker
-      resource-class: xlarge
-      tag: 2023.11.1
+  build:
+    macos:
+      xcode: 14.2.0 # indicate your selected version of Xcode
     steps:
       - checkout
-      - android/restore-gradle-cache
-      - run: ./gradlew lintDebug
-      - android/save-gradle-cache
+      - run:
+          # build our application
+          name: Build Application
+          command: xcodebuild
+      - run:
+          # compress Xcode's build output so that it can be stored as an artifact
+          name: Compress app for storage
+          command: zip -r app.zip build/Release/circleci-demo-macos.app
+      - store_artifacts: # store this build output. Read more: https://circleci.com/docs/2.0/artifacts/
+          path: app.zip
+          destination: app
 
-  unit_test:
-    executor:
-      name: android/android-docker
-      resource-class: xlarge
-      tag: 2023.11.1
-    steps:
-      - checkout
-      - android/restore-gradle-cache
-      - run: ./gradlew testDebugUnitTest
-      - android/save-gradle-cache
-      - store_test_results:
-          path: ./app/build/test-results/testDebugUnitTest
-
-  integration_test:
-    executor:
-      name: android/android-machine
-      resource-class: xlarge
-      tag: 2023.11.1
-    steps:
-      - checkout
-      - android/start-emulator-and-run-tests
-      - store_test_results:
-          path: ./app/build/outputs/androidTest-results/connected
+workflows:
+  test_build:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
