@@ -2,6 +2,9 @@
 # Build configuration for Circle CI
 #
 machine:
+  environment:
+    # Date  format to be used in naming
+    VERSION_CODE: $(date +%Y%m%d%k%M)
   java:
     version:oraclejdk8
 
@@ -14,6 +17,6 @@ dependencies:
 
 test:
   override:
-    - ./gradlew assembleDebug
+    - ./gradlew assembleDebug -PCIversionName=$APP_VERSION_NAME.$VERSION_CODE -PCIversionCode=$(APP_VERSION_CODE+1)
     - cp -r app/build/output $CIRCLE_ARTIFACTS
 

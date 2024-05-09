@@ -3,6 +3,29 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
 }
 
+project.ext {
+    versionName = "1.0"
+    versionCode = 1
+}
+
+project.afterEvaluate {
+    preBuild{}.dependsOn updateProjectInfo
+
+}
+
+task updateProjectInfo() {
+    println("Updating project info from CI")
+
+    if (project.hasProperty("CIversionName")) {
+        println("Version Name : " + CIversionName)
+        project.ext.versionName = CIversionName
+    }
+    if (project.hasProperty("CIversionCode")) {
+        println("Version Code : " + CIversionCode)
+        project.ext.versionCode = CIversionCode
+    }
+}
+
 android {
     namespace 'com.example.androidcicd'
     compileSdk 34
@@ -11,8 +34,8 @@ android {
         applicationId "com.example.androidcicd"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode = project.ext.versionCode.toInteger()
+        versionName = project.ext.versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
