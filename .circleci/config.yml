@@ -40,14 +40,3 @@ jobs:
       - android/start-emulator-and-run-tests
       - store_test_results:
           path: ./app/build/outputs/androidTest-results/connected
-
-workflows:
-  main:
-    jobs:
-      - lint
-      - unit_test
-      - integration_test
-      - beta:
-          context:
-            - mobile
-            - app-distribution
